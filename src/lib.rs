@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use std::collections::{HashSet};
+use std::collections::HashSet;
 
 pub mod dictionary;
 // The output is wrapped in a Result to allow matching on errors
@@ -50,7 +50,6 @@ pub fn is_success(statuses: &Vec<Status>) -> bool {
 
 pub fn guess_status(guess: &str, word: &str) -> Vec<Status> {
     let word_chars = word.chars().collect::<Vec<char>>();
-
 
     let mut statuses = vec![];
     let mut count = 0;
