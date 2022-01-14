@@ -14,7 +14,7 @@ fn init_game(word_length: usize, dictionary: &Dictionary) -> GameState {
 }
 
 pub struct Game {
-    word_set: HashSet<String>,
+    pub word_set: HashSet<String>,
     word_length: usize,
     state: GameState,
 }
@@ -71,6 +71,10 @@ impl Game {
 
     pub fn status_display(&self) -> String {
         format!("{}", self.state)
+    }
+
+    pub fn last_status(&self) -> Option<&Vec<(char, Status)>> {
+        self.state.guesses.last()
     }
 }
 

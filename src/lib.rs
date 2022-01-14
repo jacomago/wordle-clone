@@ -7,6 +7,7 @@ use std::{
 
 pub mod dictionary;
 pub mod game;
+pub mod solver;
 
 // The output is wrapped in a Result to allow matching on errors
 // Returns an Iterator to the Reader of the lines of the file.
@@ -18,7 +19,7 @@ where
     Ok(io::BufReader::new(file).lines())
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub enum Status {
     Incorrect,
     Correct,

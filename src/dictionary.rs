@@ -24,13 +24,17 @@ pub fn load_dictionary(filename: &str) -> Dictionary {
     Dictionary(output)
 }
 
+pub fn pick_random_word(set: &HashSet<String>) -> &str {
+    let mut rng = thread_rng();
+    set.iter().choose(&mut rng).unwrap()
+}
+
 impl Dictionary {
     pub fn gen_word(&self, word_length: usize) -> &str {
-        let mut rng = thread_rng();
         let set = self
             .get_set(word_length)
             .expect("Expected set of such words.");
-        set.iter().choose(&mut rng).unwrap()
+        pick_random_word(set)
     }
 
     pub fn get_set(&self, word_length: usize) -> Option<&HashSet<String>> {

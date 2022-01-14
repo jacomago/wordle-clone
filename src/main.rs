@@ -1,4 +1,4 @@
-use wordle_clone::{dictionary::load_dictionary, game::Game};
+use wordle_clone::{dictionary::load_dictionary, game::Game, solver::solve_game};
 
 fn get_new_guess(game: &Game) -> String {
     loop {
@@ -53,6 +53,21 @@ fn cmd_play_game() {
     );
 }
 
+fn robot_play_game() {
+    let dictionary = load_dictionary("./resources/linuxwords");
+    println!("Welcome to wordle!");
+
+    let word_length = get_word_length();
+
+    let mut game = Game::new(word_length, dictionary);
+    println!("Ready!");
+
+    let solution = solve_game(&mut game);
+    print!("{}", game.status_display());
+    println!("Correct you guessed the word: {}", solution);
+}
+
 fn main() {
+    robot_play_game();
     cmd_play_game();
 }
