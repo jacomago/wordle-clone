@@ -1,21 +1,8 @@
+use colored::Colorize;
+use std::fmt::Write;
 use std::{collections::HashSet, fmt};
 
-use colored::{ColoredString, Colorize};
-
 use crate::{dictionary::Dictionary, guess_status, Status};
-
-fn print_status(guess: &[(char, Status)]) -> ColoredString {
-    let mut output = format!("").black();
-    for (c, status) in guess {
-        let char_out = match status {
-            Status::Incorrect => format!("{}", c).red(),
-            Status::WrongPosition => format!("{}", c).yellow(),
-            Status::Correct => format!("{}", c).green(),
-        };
-        output = format!("{}{x}", output, x = char_out).normal();
-    }
-    output
-}
 
 fn init_game(word_length: usize, dictionary: &Dictionary) -> GameState {
     let word = dictionary.gen_word(word_length).to_owned();
@@ -86,6 +73,7 @@ impl Game {
         format!("{}", self.state)
     }
 }
+
 struct GameState {
     correct_word: String,
     guesses: Vec<Vec<(char, Status)>>,
@@ -101,6 +89,22 @@ impl GameState {
     }
 }
 
+fn print_status(guess: &[(char, Status)]) -> Result<String, std::fmt::Error> {
+    let mut output = String::new();
+    for (c, status) in guess {
+        write!(
+            &mut output,
+            "{}",
+            match status {
+                Status::Incorrect => format!("{}", c).red(),
+                Status::WrongPosition => format!("{}", c).yellow(),
+                Status::Correct => format!("{}", c).green(),
+            }
+        )?;
+    }
+    Ok(output)
+}
+
 impl fmt::Display for GameState {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.guesses.is_empty() {
@@ -108,9 +112,50 @@ impl fmt::Display for GameState {
         }
 
         for guess in &self.guesses {
-            f.write_str(&print_status(guess))?;
+            writeln!(f, "{}", print_status(guess)?)?;
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use colored::Colorize;
+
+    use crate::Status;
+
+    use super::GameState;
+
+    #[test]
+    fn test_state_fmt() {
+        let guesses = vec![vec![('a', Status::Correct)]];
+        let mut state = GameState {
+            correct_word: "a".to_string(),
+            guesses,
+        };
+        assert_eq!(
+            format!("{}", state),
+            format!("{}\n", format!("a").green().to_string())
+        );
+        state.update_state(vec![
+            ('a', Status::Incorrect),
+            ('b', Status::WrongPosition),
+            ('c', Status::Correct),
+        ]);
+        assert_eq!(
+            format!("{}", state),
+            format!(
+                "{}\n{second}\n",
+                format!("a").green(),
+                second = format_args!(
+                    "{}{}{}",
+                    format!("a").red(),
+                    format!("b").yellow(),
+                    format!("c").green()
+                )
+            )
+        );
     }
 }
