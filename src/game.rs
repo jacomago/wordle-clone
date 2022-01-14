@@ -20,8 +20,8 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(word_length: usize, dictionary: Dictionary) -> Game {
-        let state = init_game(word_length, &dictionary);
+    pub fn new(word_length: usize, dictionary: &Dictionary) -> Game {
+        let state = init_game(word_length, dictionary);
         let word_set = dictionary.get_set(word_length).unwrap().to_owned();
         Game {
             word_set,
@@ -75,6 +75,10 @@ impl Game {
 
     pub fn last_status(&self) -> Option<&Vec<(char, Status)>> {
         self.state.guesses.last()
+    }
+
+    pub fn number_guesses(&self) -> usize {
+        self.state.guesses.len()
     }
 }
 

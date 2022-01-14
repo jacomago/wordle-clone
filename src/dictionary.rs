@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, hash_map::Keys};
 
 use rand::{prelude::IteratorRandom, thread_rng};
 
@@ -39,5 +39,9 @@ impl Dictionary {
 
     pub fn get_set(&self, word_length: usize) -> Option<&HashSet<String>> {
         self.0.get(&word_length)
+    }
+
+    pub fn keys(&self) -> Keys<'_, usize, std::collections::HashSet<std::string::String>, > {
+        self.0.keys()
     }
 }
