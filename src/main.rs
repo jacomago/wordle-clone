@@ -1,28 +1,19 @@
-use colored::Colorize;
-use wordle_clone::{
-    dictionary::{load_dictionary, Dictionary},
-    guess_status, invalid_guess, is_success, Status,
-};
+use wordle_clone::{dictionary::load_dictionary, game::Game};
 
-fn print_current_status(guesses: &Vec<(String, Vec<Status>)>) {
-    for guess in guesses {
-        print_status(&guess.0, &guess.1);
-    }
-}
+fn get_new_guess(game: &Game) -> String {
+    loop {
+        let mut guess = String::new();
+        println!("Enter guess:");
+        std::io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line.");
+        let trimmed_guess = guess.trim().to_lowercase();
 
-fn print_status(guess: &str, statuses: &Vec<Status>) {
-    let mut count = 0;
-    for c in guess.chars() {
-        let status = &statuses[count];
-        let char_out = match status {
-            Status::Incorrect => format!("{}", c).red(),
-            Status::WrongPosition => format!("{}", c).yellow(),
-            Status::Correct => format!("{}", c).green(),
-        };
-        print!("{}", char_out);
-        count += 1;
+        match game.invalid_guess(&trimmed_guess) {
+            Ok(_) => return trimmed_guess,
+            Err(e) => println!("{}", e),
+        }
     }
-    println!();
 }
 
 fn get_word_length() -> usize {
@@ -38,50 +29,30 @@ fn get_word_length() -> usize {
         .expect("Expected a positive number.")
 }
 
-fn get_new_guess(word_length: usize, dictionary: &Dictionary) -> Option<String> {
-    if let Some(set) = dictionary.get_set(word_length) {
-        loop {
-            let mut guess = String::new();
-            println!("Enter guess:");
-            std::io::stdin()
-                .read_line(&mut guess)
-                .expect("Failed to read line.");
-            let trimmed_guess = guess.trim().to_lowercase();
-
-            if invalid_guess(&trimmed_guess, word_length, set) {
-                return Some(trimmed_guess);
-            }
-        }
-    } else {
-        None
-    }
-}
-
-fn play_game(dictionary: &Dictionary) {
+fn cmd_play_game() {
+    let dictionary = load_dictionary("./resources/linuxwords");
     println!("Welcome to wordle!");
 
     let word_length = get_word_length();
 
-    let word = dictionary.gen_word(word_length);
+    let mut game = Game::new(word_length, dictionary);
     println!("Ready!");
 
-    let mut prev_guesses = vec![];
     loop {
-        let guess = get_new_guess(word_length, dictionary);
-        let current_status = guess_status(&guess.clone().unwrap(), &word);
+        let guess = get_new_guess(&game);
+        game.play_game(guess);
+        print!("{}", game.status_display());
 
-        if is_success(&current_status) {
+        if game.is_success() {
             break;
         }
-
-        prev_guesses.push((guess.unwrap(), current_status));
-        print_current_status(&prev_guesses);
     }
-
-    println!("Correct you guessed the word: {}", word);
+    println!(
+        "Correct you guessed the word: {}",
+        game.get_correct_word().unwrap()
+    );
 }
 
 fn main() {
-    let dictionary = load_dictionary("./resources/linuxwords");
-    play_game(&dictionary);
+    cmd_play_game();
 }
